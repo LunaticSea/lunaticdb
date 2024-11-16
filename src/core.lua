@@ -1,10 +1,9 @@
-local luvit_core = require('core')
 local json = require('json')
-local core = luvit_core.Object:extend()
+local core = require('class'):create()
 local default_csv = require('./drivers/csv.lua')
 
 -- options.db_name
-function core:initialize(options)
+function core:init(options)
   self.options = options or {}
   self.is_load = false
   self.driver = nil
@@ -18,7 +17,7 @@ end
 -- options[other_args]
 function core:load(options)
   if options and options.driver then
-    assert(options.driver.is_load, "Driver must be unload before use load() function")
+    assert(options.driver.is_load ~= 'loaded', "Driver must be unload before use load() function")
   end
   self.driver_options = options or {
     driver = default_csv
@@ -57,8 +56,8 @@ function core:get(key)
   local cache = self.cache[self.db_name][key]
   if cache then return cache end
 
-  local driver_get = self.driver:get(key)
-  return driver_get
+  local driver_get, err = self.driver:get(key)
+  return driver_get, err
 end
 
 function core:delete(key)

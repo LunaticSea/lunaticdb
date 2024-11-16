@@ -1,6 +1,5 @@
 local fs = require('fs')
 local filter = require('../utils/filter')
-local core = require('core')
 local spliter = require("../utils/spliter")
 local openSync, writeSync, readSync = fs.openSync, fs.writeSync, fs.readSync
 local format = string.format
@@ -9,11 +8,11 @@ local default = {
   file_name = "lunatic.db.csv"
 }
 
-local csv_driver = core.Object:extend()
+local csv_driver = require('class'):create()
 
 -- options.file_name
 -- options.db_name
-function csv_driver:initialize(options, parent)
+function csv_driver:init(options, parent)
   options = options or {}
   self.parent = parent
   self.file_name = options.file_name or default.file_name
@@ -25,13 +24,13 @@ function csv_driver:initialize(options, parent)
     db_finder = '"%s", "(.+)", "(.+)"',
   }
   self.header = "DATABASE, KEY, VALUE\n"
-  self.isload = false
+  self.isload = 'not_load'
 end
 
 function csv_driver:load()
   self.file = self.file_name and openSync(self.file_name, 'a+')
   self:check_header()
-  self.is_load = true
+  self.is_load = 'loaded'
   return self
 end
 
@@ -47,14 +46,13 @@ end
 function csv_driver:set(key, data)
   assert(self.file, 'File not avaliable, try change the path or run load() func')
   local exist_data, exist_index = self:get(key)
-  local og_data = data
 
   data = self.parent:convert_input(data)
 
   if not exist_data then
     local dump_data = format(self.template.withbreak, self.db_name, key, data)
     writeSync(self.file, -1, dump_data)
-    return true
+    return data
   end
 
   local new_data = format(self.template.nobreak, self.db_name, key, data)
@@ -68,7 +66,7 @@ function csv_driver:set(key, data)
   local string_merge = self:convert_all_output(original_value)
   fs.writeFileSync(self.file_name, string_merge)
 
-  return og_data
+  return data
 end
 
 function csv_driver:get(key)
