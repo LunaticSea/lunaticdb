@@ -5,9 +5,7 @@ local default_csv = require('./drivers/csv.lua')
 -- options.db_name
 function core:init(options)
   self.options = options or {}
-  self.is_load = false
   self.driver = nil
-  self.og_driver = nil
   self.cache = {}
   self.db_name = options.db_name or 'lunatic_db'
   self.cache[self.db_name] = {}
@@ -23,10 +21,7 @@ function core:load(options)
     driver = default_csv
   }
   self.driver_options.db_name = self.db_name
-  self.og_driver = self.driver_options.driver
-  self.driver = self.driver_options.driver:new(self.driver_options, self)
-
-  self.driver:load()
+  self.driver = self.driver_options.driver:new(self.driver_options, self):load()
   self:_load_cache()
 
   return self
@@ -96,7 +91,6 @@ function core:db_drop(db_name)
 end
 
 function core:create_db(db_name, driver)
-  assert(self.og_driver, "Something went wrong, og_driver not found")
   assert(self.db_name, "Missing db_name #1 args")
   self.options.db_name = db_name
   if driver then self.driver_options = driver end

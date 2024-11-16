@@ -75,6 +75,8 @@ function csv_driver:get(key)
   local full_data, err = self:db_all()
   assert(not err, err)
 
+  key = self.parent:convert_input(key)
+
   local pattern = string.format(self.template.value_finder, self.db_name, key)
 
   for _, element in pairs(full_data) do
