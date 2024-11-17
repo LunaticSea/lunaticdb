@@ -1,3 +1,1 @@
-return {
-  csv = require('./csv')
-}
+return { csv = require('./csv') }
