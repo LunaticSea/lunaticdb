@@ -47,12 +47,16 @@ function core:get(key)
 	assert(self.cache[self.db_name], "This database doesn't exist")
 
 	local cache = self.cache[self.db_name][key]
-	if cache then
-		return cache
+	local error
+
+	if not cache then
+		local driver_get, err = self.driver:get(key)
+		cache = driver_get
+		error = err
 	end
 
-	local driver_get, err = self.driver:get(key)
-	return driver_get, err
+	cache = self:convert_output(cache)
+	return cache, error
 end
 
 function core:delete(key)
@@ -107,8 +111,8 @@ function core:convert_input(data)
 end
 
 function core:convert_output(data)
-	local is_json = pcall(json.decode, data)
-	if type(is_json) == 'table' then
+	local is_json = json.decode(data)
+	if is_json then
 		return is_json
 	end
 
@@ -130,7 +134,7 @@ function core:convert_output(data)
 		return tonumber(data)
 	end
 
-	return nil
+	return data
 end
 
 return core
