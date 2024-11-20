@@ -55,7 +55,9 @@ function core:get(key)
 		error = err
 	end
 
+	p(cache)
 	cache = self:convert_output(cache)
+	p(cache)
 	return cache, error
 end
 
@@ -111,9 +113,12 @@ function core:convert_input(data)
 end
 
 function core:convert_output(data)
-	local is_json = json.decode(data)
+	if type(data) == 'nil' then return nil end
+
+	local is_json = pcall(json.decode, data)
 	if is_json then
-		return is_json
+		local converted = json.decode(data)
+		if converted then return json.decode(data) end
 	end
 
 	if data == 'nil' then
