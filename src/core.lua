@@ -55,9 +55,7 @@ function core:get(key)
 		error = err
 	end
 
-	p(cache)
 	cache = self:convert_output(cache)
-	p(cache)
 	return cache, error
 end
 
