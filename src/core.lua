@@ -3,24 +3,20 @@ local core = require('class'):create()
 local default_csv = require('./drivers/csv.lua')
 
 -- options.db_name
--- options.driver
--- options.driver_options
 function core:init(options)
 	self.options = options or {}
-	self.driver = self.options.driver
+	self.driver = nil
 	self.cache = {}
 	self.db_name = options.db_name or 'lunatic_db'
 	self.cache[self.db_name] = {}
-	if self.options.driver then
-		assert(options.driver.is_load ~= 'loaded', 'Driver must be unload before use load() function')
-		self.driver = self.options.driver
-	end
-	self.driver_options = self.options.driver_options
 end
 
-function core:load()
-  assert(self.driver, 'Missing driver')
-	self.driver = self.driver:new(self.driver_options, self):load()
+function core:load(driver, config)
+	self.driver = driver:new({
+	  db_name = self.db_name,
+	  table.unpack(config)
+	}, self):load()
+
 	self:_load_cache()
 	return self
 end
@@ -96,11 +92,11 @@ end
 
 function core:create_db(db_name, driver)
 	assert(self.db_name, 'Missing db_name #1 args')
+
+	driver = driver or self.driver
 	self.options.db_name = db_name
-	if driver then
-		self.driver_options = driver
-	end
-	return core:new(self.options):load()
+	
+	return core:new(self.options):load(self.driver, self.driver_config)
 end
 
 function core:convert_input(data)
