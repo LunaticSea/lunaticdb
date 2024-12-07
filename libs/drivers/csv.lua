@@ -1,12 +1,12 @@
 local fs = require('fs')
-local filter = require('../utils/filter')
-local spliter = require('../utils/spliter')
+local filter = require('utils/filter')
+local spliter = require('utils/spliter')
 local openSync, writeSync, readSync = fs.openSync, fs.writeSync, fs.readSync
 local format = string.format
 
 local default = { file_name = 'lunatic.db.csv' }
 
-local csv_driver = require('class'):create()
+local csv_driver = require('class')('csv_driver')
 
 -- options.file_name
 -- options.db_name
@@ -167,7 +167,7 @@ end
 
 function csv_driver:db_create(db_name)
 	assert(self.file, 'File not avaliable, try change the path or run load() func')
-	return csv_driver:new({ db_name = db_name })
+	return csv_driver({ db_name = db_name })
 end
 
 function csv_driver:convert_all_output(obj_data)

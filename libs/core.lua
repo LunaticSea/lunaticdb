@@ -1,6 +1,5 @@
 local json = require('json')
-local core = require('class'):create()
-local default_csv = require('./drivers/csv.lua')
+local core = require('class')('core')
 
 -- options.db_name
 function core:init(options)
@@ -12,7 +11,7 @@ function core:init(options)
 end
 
 function core:load(driver, config)
-	self.driver = driver:new({
+	self.driver = driver({
 	  db_name = self.db_name,
 	  table.unpack(config)
 	}, self):load()
@@ -96,7 +95,7 @@ function core:create_db(db_name, driver)
 	driver = driver or self.driver
 	self.options.db_name = db_name
 	
-	return core:new(self.options):load(self.driver, self.driver_config)
+	return core(self.options):load(self.driver, self.driver_config)
 end
 
 function core:convert_input(data)

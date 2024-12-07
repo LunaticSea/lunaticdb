@@ -1,4 +1,4 @@
 return {
-	core = require('./src/core.lua'),
-	driver = require('./src/drivers/init.lua'),
+	core = require('core'),
+	driver = require('drivers/init'),
 }
