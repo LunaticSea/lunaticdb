@@ -95,7 +95,7 @@ function core:create_db(db_name, driver)
 	driver = driver or self.driver
 	self.options.db_name = db_name
 	
-	return core(self.options):load(self.driver, self.driver_config)
+	return core(self.options):load(self.driver, self.driverconfig)
 end
 
 function core:convert_input(data)
