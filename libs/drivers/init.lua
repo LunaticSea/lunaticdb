@@ -1,1 +1,4 @@
-return { csv = require('./csv') }
+return {
+  csv = require('./csv'),
+  rethink = require('./rethink')
+}

@@ -6,12 +6,25 @@ local format = string.format
 
 local default = { file_name = 'lunatic.db.csv' }
 
-local csv_driver = require('class')('csv_driver')
+local CSV = require('class')('CSVDriver')
 
--- options.file_name
--- options.db_name
-function csv_driver:init(options, parent)
+--[[
+local lunaticdb = require('lunaticdb')
+local csv = lunaticdb.driver.csv
+
+local db = lunaticdb.core({ db_name = value })
+db:load(driver, {
+	file_name = 'hello.csv',
+	db_name = 'lunatic_db'
+})
+
+db:set('Hi', 'Hello')
+print(db:get('Hi'))
+]]
+
+function CSV:init(options, parent)
 	options = options or {}
+	self.options = options
 	self.parent = parent
 	self.file_name = options.file_name or default.file_name
 	self.db_name = options.db_name or 'lunatic_db'
@@ -22,17 +35,15 @@ function csv_driver:init(options, parent)
 		db_finder = '"%s", "(.+)", "(.+)"',
 	}
 	self.header = 'DATABASE, KEY, VALUE\n'
-	self.isload = 'not_load'
 end
 
-function csv_driver:load()
+function CSV:load()
 	self.file = self.file_name and openSync(self.file_name, 'a+')
 	self:check_header()
-	self.is_load = 'loaded'
 	return self
 end
 
-function csv_driver:check_header()
+function CSV:check_header()
 	local data, err = readSync(self.file)
 	assert(not err, err)
 	if not string.match(data, self.header) then
@@ -41,7 +52,7 @@ function csv_driver:check_header()
 	return true
 end
 
-function csv_driver:set(key, data)
+function CSV:set(key, data)
 	assert(self.file, 'File not avaliable, try change the path or run load() func')
 	local exist_data, exist_index = self:get(key)
 
@@ -69,7 +80,7 @@ function csv_driver:set(key, data)
 	return data
 end
 
-function csv_driver:get(key)
+function CSV:get(key)
 	assert(key, 'key not avaliable')
 	assert(self.file, 'File not avaliable, try change the path or run load() func')
 	local full_data, err = self:db_all()
@@ -89,7 +100,7 @@ function csv_driver:get(key)
 	return nil, nil
 end
 
-function csv_driver:delete(key)
+function CSV:delete(key)
 	assert(self.file, 'File not avaliable, try change the path or run load() func')
 	local exist_data, exist_index = self:get(key)
 	if not exist_data or not exist_index then
@@ -111,7 +122,7 @@ function csv_driver:delete(key)
 	}
 end
 
-function csv_driver:all(custom_db)
+function CSV:all(custom_db)
 	local res = {}
 	local all_data, err = self:db_all()
 	assert(not err, err)
@@ -130,7 +141,7 @@ function csv_driver:all(custom_db)
 	return res
 end
 
-function csv_driver:db_all()
+function CSV:db_all()
 	local res = {}
 	local data, err = fs.readFileSync(self.file_name)
 	if err then
@@ -146,7 +157,7 @@ function csv_driver:db_all()
 	return res, nil
 end
 
-function csv_driver:db_drop(db_name)
+function CSV:db_drop(db_name)
 	assert(self.file, 'File not avaliable, try change the path or run load() func')
 	local original_value = self:db_all()
 
@@ -165,12 +176,14 @@ function csv_driver:db_drop(db_name)
 	fs.writeFileSync(self.file_name, string_merge)
 end
 
-function csv_driver:db_create(db_name)
+function CSV:db_create(db_name)
 	assert(self.file, 'File not avaliable, try change the path or run load() func')
-	return csv_driver({ db_name = db_name })
+  local modded_option = self.options
+  modded_option.db_name = db_name
+  return CSV(db_name)
 end
 
-function csv_driver:convert_all_output(obj_data)
+function CSV:convert_all_output(obj_data)
 	local new_string = ''
 	for _, element in pairs(obj_data) do
 		if type(element.value) ~= 'nil' then
@@ -180,4 +193,4 @@ function csv_driver:convert_all_output(obj_data)
 	return new_string
 end
 
-return csv_driver
+return CSV

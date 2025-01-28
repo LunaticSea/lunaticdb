@@ -1,8 +1,8 @@
 local json = require('json')
-local core = require('class')('core')
+local Core = require('class')('Core')
 
 -- options.db_name
-function core:init(options)
+function Core:init(options)
 	self.options = options or {}
 	self.driver = nil
 	self.cache = {}
@@ -10,24 +10,23 @@ function core:init(options)
 	self.cache[self.db_name] = {}
 end
 
-function core:load(driver, config)
-	self.driver = driver({
-	  db_name = self.db_name,
-	  table.unpack(config)
-	}, self):load()
+function Core:load(driver, config)
+	local new_config = config
+	new_config.db_name = self.db_name
+	self.driver = driver(new_config, self):load()
 
 	self:_load_cache()
 	return self
 end
 
-function core:_load_cache()
+function Core:_load_cache()
 	local full_db = self.driver:all()
 	for _, elements in pairs(full_db) do
 		self.cache[self.db_name][elements.key] = elements.data
 	end
 end
 
-function core:set(key, data)
+function Core:set(key, data)
 	assert(self.driver, 'Driver not found, please load it on load()')
 	assert(self.cache[self.db_name], "This database doesn't exist")
 
@@ -37,7 +36,7 @@ function core:set(key, data)
 	return res
 end
 
-function core:get(key)
+function Core:get(key)
 	assert(self.driver, 'Driver not found, please load it on load()')
 	assert(self.cache[self.db_name], "This database doesn't exist")
 
@@ -54,7 +53,7 @@ function core:get(key)
 	return cache, error
 end
 
-function core:delete(key)
+function Core:delete(key)
 	assert(self.driver, 'Driver not found, please load it on load()')
 	assert(self.cache[self.db_name], "This database doesn't exist")
 
@@ -68,7 +67,7 @@ function core:delete(key)
 	}
 end
 
-function core:delete_all(db_name)
+function Core:delete_all(db_name)
 	assert(self.driver, 'Driver not found, please load it on load()')
 	db_name = db_name or self.db_name
 	self.driver:db_drop(db_name)
@@ -76,12 +75,12 @@ function core:delete_all(db_name)
 	return nil
 end
 
-function core:all()
+function Core:all()
 	assert(self.driver, 'Driver not found, please load it on load()')
 	return self.driver:all()
 end
 
-function core:db_drop(db_name)
+function Core:db_drop(db_name)
 	assert(self.driver, 'Driver not found, please load it on load()')
 	db_name = db_name or self.db_name
 	self.driver:db_drop(db_name)
@@ -89,23 +88,23 @@ function core:db_drop(db_name)
 	return nil
 end
 
-function core:create_db(db_name, driver)
+function Core:create_db(db_name, driver)
 	assert(self.db_name, 'Missing db_name #1 args')
 
 	driver = driver or self.driver
 	self.options.db_name = db_name
 	
-	return core(self.options):load(self.driver, self.driverconfig)
+	return Core(self.options):load(self.driver, self.driverconfig)
 end
 
-function core:convert_input(data)
+function Core:convert_input(data)
 	if type(data) == 'table' then
 		return json.encode(data)
 	end
 	return tostring(data)
 end
 
-function core:convert_output(data)
+function Core:convert_output(data)
 	if type(data) == 'nil' then return nil end
 
 	local is_json = pcall(json.decode, data)
@@ -135,4 +134,4 @@ function core:convert_output(data)
 	return data
 end
 
-return core
+return Core
