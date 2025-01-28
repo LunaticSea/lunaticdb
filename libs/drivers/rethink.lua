@@ -38,7 +38,6 @@ function Rethink:init(options, parent)
       options[key] = value
     end
   end
-  p(self.options)
 	self.parent = parent
   self.db_name = options.database
   self.connection = nil
