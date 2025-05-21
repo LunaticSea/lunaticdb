@@ -30,7 +30,9 @@ function Core:set(key, data)
 	assert(self.driver, 'Driver not found, please load it on load()')
 	assert(self.cache[self.db_name], "This database doesn't exist")
 
+	p(self.cache[self.db_name])
 	local res = self.driver:set(key, data)
+	p(res)
 	self.cache[self.db_name][key] = res
 
 	return res

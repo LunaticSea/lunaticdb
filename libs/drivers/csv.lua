@@ -32,7 +32,7 @@ function CSV:init(options, parent)
 		withbreak = '"%s", "%s", "%s"\n',
 		nobreak = '"%s", "%s", "%s"',
 		value_finder = '"%s", "%s", "(.+)"',
-		db_finder = '"%s", "(.+)", "(.+)"',
+		db_finder = '"%s", "(.*)", "(.+)"',
 	}
 	self.header = 'DATABASE, KEY, VALUE\n'
 end
