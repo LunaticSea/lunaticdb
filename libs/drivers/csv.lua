@@ -87,6 +87,7 @@ function CSV:get(key)
 	assert(not err, err)
 
 	key = self.parent:convert_input(key)
+	key = type(key) == "string" and self:escape_lua_pattern(key) or key
 
 	local pattern = string.format(self.template.value_finder, self.db_name, key)
 
@@ -191,6 +192,10 @@ function CSV:convert_all_output(obj_data)
 		end
 	end
 	return new_string
+end
+
+function CSV:escape_lua_pattern(s)
+	return s:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
 end
 
 return CSV
